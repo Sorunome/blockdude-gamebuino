@@ -156,12 +156,23 @@ void moveWorld(){
     }
   }
 }
+unsigned int moves;
+void climb(){
+  byte tmpX = playerX+(lookLeft?-1:1);
+  if(!canMove(tmpX,playerY) && canMove(tmpX,playerY-1) && canMove(playerX,playerY-1)  && (!doLift || (canMove(tmpX,playerY-2) && canMove(playerX,playerY-2)))){
+    playerY--;
+    playerX = tmpX;
+    mapY -= 8;
+    mapX = mapX+(lookLeft?-8:8);
+    gb.sound.playTick();
+    moves++;
+  }
+}
 int playMap(){
-  unsigned int moves = 0;
+  moves = 0;
   while(1){
     if(gb.update()){
       if(gb.buttons.pressed(BTN_LEFT)){
-        lookLeft = true;
         if(canMove(playerX-1,playerY)){
           if(doLift && !canMove(playerX-1,playerY-1)){
             blocks[liftBlock]->put(playerX,playerY-1);
@@ -171,10 +182,12 @@ int playMap(){
           mapX -= 8;
           gb.sound.playTick();
           moves++;
+        }else if(lookLeft){
+          climb();
         }
+        lookLeft = true;
       }
       if(gb.buttons.pressed(BTN_RIGHT)){
-        lookLeft = false;
         if(canMove(playerX+1,playerY)){
           if(doLift && !canMove(playerX+1,playerY-1)){
             blocks[liftBlock]->put(playerX,playerY-1);
@@ -184,7 +197,10 @@ int playMap(){
           mapX += 8;
           gb.sound.playTick();
           moves++;
+        }else if(!lookLeft){
+          climb();
         }
+        lookLeft = false;
       }
       if(gb.buttons.pressed(BTN_DOWN)){
         if(doLift){
@@ -212,15 +228,7 @@ int playMap(){
         }
       }
       if(gb.buttons.pressed(BTN_UP)){
-        byte tmpX = playerX+(lookLeft?-1:1);
-        if(!canMove(tmpX,playerY) && canMove(tmpX,playerY-1) && canMove(playerX,playerY-1)  && (!doLift || (canMove(tmpX,playerY-2) && canMove(playerX,playerY-2)))){
-          playerY--;
-          playerX = tmpX;
-          mapY -= 8;
-          mapX = mapX+(lookLeft?-8:8);
-          gb.sound.playTick();
-          moves++;
-        }
+        climb();
       }
       if(gb.buttons.pressed(BTN_A)){
         int oldMapX = mapX;
