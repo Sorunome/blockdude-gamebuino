@@ -35,6 +35,8 @@ bool lookLeft = true;
 byte getTile(byte x,byte y){
   return pgm_read_byte(gamemap+y*mapWidth+x);
 }
+bool canMove(byte cx,byte cy);
+void refreshLevelMenu(byte curPick);
 class Block {
   byte x,y;
   bool islift;
